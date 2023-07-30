@@ -1,0 +1,11 @@
+supplier,price,quantity
+ACorp,0,50000
+ACorp,0.8,120000
+BCorp,0,50000
+BCorp,0.7,100000
+CCorp,0,0
+CCorp,0.7,50000
+DCorp,0,20000
+DCorp,0.7,60000
+ECorp,0,0
+ECorp,0.7,20000
