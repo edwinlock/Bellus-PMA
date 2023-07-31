@@ -118,7 +118,7 @@ function optimal_rounding_lp(allocation, numbuyerbids, reserves)
     @constraint(model, reserves[i ∈ 1:n], sum(x[i,1:k]) ≥ Δreserve[i])  # uphold reserve quantity constraints
     @constraint(model, bounds[i ∈ 0:n, b ∈ 1:m], 0 ≤ x[i,b] ≤ ub[i,b])  # upper and lower bounds on variables
 
-    @objective(model, Max, sum( (ca[i,b]^2 - fa[i,b]^2) * x[i,b] for i ∈ 0:n, b ∈ 1:m ))
+    @objective(model, Min, sum( (ca[i,b]^2 - fa[i,b]^2) * x[i,b] for i ∈ 0:n, b ∈ 1:m ))
 
     return model, x
 end
