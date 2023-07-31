@@ -77,10 +77,6 @@ using PrecompileTools
         BellusAuction.main(args2)
         BellusAuction.main(args3)
         BellusAuction.main(args4)
-        try
-            BellusAuction.main([])
-        catch
-        end
     end
 end
 

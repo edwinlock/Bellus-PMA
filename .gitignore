@@ -25,3 +25,6 @@ Manifest.toml
 
 sys_bellus.so
 outcomes/
+
+.DS_Store
+bpma.exe

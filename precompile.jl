@@ -14,8 +14,4 @@ redirect_stdout(devnull) do  # suppress output to terminal while precompiling
     BellusAuction.main(args2)
     BellusAuction.main(args3)
     BellusAuction.main(args4)
-    try
-        BellusAuction.main([])
-    catch
-    end
 end

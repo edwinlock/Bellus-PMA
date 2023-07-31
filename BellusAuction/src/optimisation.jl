@@ -1,4 +1,4 @@
-using JuMP, HiGHS, Combinatorics, COSMO
+using JuMP, HiGHS, Combinatorics
 using ProgressBars
 
 ### Finding market prices
