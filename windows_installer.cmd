@@ -1,9 +1,10 @@
-: Ensure that current working directory is the directory containing this file
 @echo off
+
+: Ensure that current working directory is the directory containing this file
 @setlocal enableextensions
 @cd /d "%~dp0"
 
-set dir=%PROGRAMFILES%\BellusPMA
+set dir=%HOMEPATH%\AppData\Local\Programs
 : create directory for program files
 if not exist "%dir%\NUL" mkdir "%dir%"
 : copy over files
