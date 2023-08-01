@@ -1,4 +1,4 @@
-using JuMP, HiGHS, Combinatorics
+using JuMP, HiGHS, Combinatorics, COSMO
 using ProgressBars
 
 """
@@ -80,8 +80,8 @@ function relaxed_balancing_program(market::BellusPMA, prices::Vector{Float64}; o
     k = market.numbuyerbids
     w = market.bidweights
     model, a = feasibility_lp(market, prices; override_reserves=override_reserves)
-    set_optimizer(model, HiGHS.Optimizer)  # change solver to HiGHS
-    # set_attribute(model, "eps_abs", 1e-10)
+    set_optimizer(model, COSMO.Optimizer)  # change solver to COSMO
+    set_attribute(model, "eps_abs", 1e-10)
     # Set objective to maximise the square roots of allocations to buyer bids
     @objective(model, Min, sum( (a[i,b])^2 / w[b] for (i,b) in eachindex(a) if i ≠ 0 && b ∈ 1:k ))
     return model, a
@@ -118,7 +118,7 @@ function optimal_rounding_lp(allocation, numbuyerbids, reserves)
     @constraint(model, reserves[i ∈ 1:n], sum(x[i,1:k]) ≥ Δreserve[i])  # uphold reserve quantity constraints
     @constraint(model, bounds[i ∈ 0:n, b ∈ 1:m], 0 ≤ x[i,b] ≤ ub[i,b])  # upper and lower bounds on variables
 
-    @objective(model, Max, sum( (ca[i,b]^2 - fa[i,b]^2) * x[i,b] for i ∈ 0:n, b ∈ 1:m ))
+    @objective(model, Min, sum( (ca[i,b]^2 - fa[i,b]^2) * x[i,b] for i ∈ 0:n, b ∈ 1:m ))
 
     return model, x
 end
