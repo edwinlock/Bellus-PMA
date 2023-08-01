@@ -4,8 +4,8 @@
 @setlocal enableextensions
 @cd /d "%~dp0"
 
+: create directory for program files if it doesn't exist yet
 set dir=%HOMEPATH%\AppData\Local\Programs
-: create directory for program files
 if not exist "%dir%\NUL" mkdir "%dir%"
 : copy over files
 XCOPY /e /r /y "%CD%\*.*" "%dir%"
