@@ -1,4 +1,5 @@
 : Ensure that current working directory is the directory containing this file
+@echo off
 @setlocal enableextensions
 @cd /d "%~dp0"
 
