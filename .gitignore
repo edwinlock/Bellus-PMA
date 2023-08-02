@@ -25,6 +25,7 @@ Manifest.toml
 
 sys_bellus.so
 outcomes/
+distributed_zips/
 
 .DS_Store
 bpma.exe
