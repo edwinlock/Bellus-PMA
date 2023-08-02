@@ -1,18 +1,25 @@
 # Installation
 
-To install the Bellus-PMA software in Windows, follow these steps.
+## Windows instructions
 
 1. Download and install Julia (version 1.9.2) from https://julialang.org/downloads/. When asked by the installer, select the option "add Julia to PATH".
 2. Right-click on the `windows_installer.cmd` file and select 'Run as administrator'. The installer may take a while (approximately 10 minutes on my computer).
 You can close the window once it says "Installer completed".
 3. (Optional.) I recommend installing a modern terminal such as the (free) Microsoft Windows Terminal available at https://www.microsoft.com/store/productid/9N0DX20HK701.
 
+## Linux / macOS instructions
+
+1. Clone the github repository.
+2. Install Julia 1.9 from your preferred repository or from https://julialang.org/. Following the installation instructions, ensure that Julia has been added to the path.
+3. Run `julia --threads auto install.jl` in the terminal. This should take 5-15 minutes and create a compiled `sys_bellus.so` sysimage file for faster loading.
+4. Create an alias `alias belluspma="julia --threads auto --sysimage=path/to/sys_bellus.so path/to/run.jl"`, replacing the dummy path with the correct path. Optionally,
+add this alias permanently to your shell configuration.
 
 # Using the software
 
-The software can be run in a terminal or the command prompt. (To open the command prompt, press the Windows key + R, then type `cmd.exe` and press return.)
+The software can be run in a terminal or the command prompt (in Windows). (To open the command prompt in Windows, press the Windows key + R, then type `cmd.exe` and press return.)
 
-In the terminal or command prompt, run the software by typing `belluspma` and pressing return. To see all options for the software, use the option `belluspma --help`. Example buyer and supplier
+Run the software by typing `belluspma` and pressing return. To see all options for the software, use the option `belluspma --help`. Example buyer and supplier
 CSV files are provided in the `examples` folder.
 
 Examples:
