@@ -83,7 +83,7 @@ function relaxed_balancing_program(market::BellusPMA, prices::Vector{Float64}; o
     set_optimizer(model, COSMO.Optimizer)  # change solver to COSMO
     set_attribute(model, "eps_abs", 1e-10)
     # Set objective to maximise the square roots of allocations to buyer bids
-    @objective(model, Min, sum( (a[i,b])^2 / w[b] for (i,b) in eachindex(a) if i ≠ 0 && b ∈ 1:k ))
+    @objective(model, Min, sum( a[i,b]^2 / w[b] for (i,b) in eachindex(a) if i ≠ 0 && b ∈ 1:k ))
     return model, a
 end
 

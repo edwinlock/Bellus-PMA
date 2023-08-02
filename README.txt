@@ -19,6 +19,6 @@ CSV files are provided in the `examples` folder.
 
 Examples:
 
-`belluspma -b examples/buyers1.csv -s suppliers1.csv`
+`belluspma -b examples/buyers2.csv -s suppliers2.csv`
 
-`belluspma -b examples/buyers2.csv -s supplier2.csv -m exhaustivesearch -o numbuyers`
+`belluspma -b examples/buyers_large1.csv -s suppliers_large.csv -m exhaustivesearch -o numbuyers`
