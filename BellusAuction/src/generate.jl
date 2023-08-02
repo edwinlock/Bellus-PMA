@@ -1,4 +1,4 @@
-using Random, Distributions
+using Random, Distributions, DataFrames, CSV
 
 """
 Generate `m` bids. Bid value entries are drawn from `bidvals[i]` distribution
@@ -26,16 +26,51 @@ generate_buyerbids(values, weights, n, m) = generate_buyerbids(ntuple(x->values,
 Generate `n` suppliers with supply quantities drawn from `supplyvals', and reserve quantities
 computed as a percentage of supply drawn from reserve_pcts.
 """
-function generate_suppliers(supplyvals, reserve_pcts, n)
+function generate_suppliers(supplyvals, reserve_prices, reserve_pcts, n)
     supply = rand(supplyvals, n)
     bidvalues = Origin(0,1)(zeros(n+1,n))
+    for i ∈ 1:n; bidvalues[i,i] = rand(reserve_prices); end
     weights = copy(supply)
-    reserves = rand(reserve_pcts, n) .* supply
-    suppliernames = ["$(Char(64+i))Corp" for i in 1:n]
+    reserves = Int.(round.(rand(reserve_pcts, n) .* supply))
+    suppliernames = ["Supplier$(Char(64+i))" for i in 1:n]
     return (bidvalues=bidvalues, bidweights=weights, supply=supply, reserves=reserves, suppliernames=suppliernames)
 end
 
 
 """Generate `n` suppliers with supply quantities drawn from `supplyvals'."""
-generate_suppliers(supplyvals, n) = generate_suppliers(supplyvals, 0:0, n)
+generate_suppliers(supplyvals, n) = generate_suppliers(supplyvals, 0:0, 0:0, n)
 
+
+function buyerdata2file(buyerdata, output)
+    bidvals = buyerdata.bidvalues[1:end,:]
+    weights = buyerdata.bidweights
+    names = buyerdata.buyernames
+    n = size(bidvals)[1]
+    matrix = [weights'; bidvals]'
+    df = DataFrame([names matrix], [:buyer, :quantity] ∪ Symbol.(1:n))
+    # CSV.write(output, df)
+    return df
+end
+
+"""Currently only supports one-step supply curves."""
+function supplierdata2file(supplierdata, output)
+    n = length(supplierdata.supply)
+    prices = [ supplierdata.bidvalues[i,i] for i ∈ 1:n]
+    supply = supplierdata.supply
+    reserves = supplierdata.reserves
+    supplier_col = vcat( [[n,n] for n in supplierdata.suppliernames]... )
+    price_col = vcat( [[p,p] for p in prices]... )
+    quantity_col = vcat( [[reserves[i], supply[i]] for i in eachindex(supply)]... )
+    df = DataFrame(
+        :supplier => supplier_col,
+        :price => price_col,
+        :quantity => quantity_col
+    )
+    return df
+    # CSV.write(output, df)
+end
+
+
+# Command used to generate 'large' examples
+# buyerdata_large1 = generate_buyerbids(0.7:0.01:0.9, 1000:500:7000, 10, 100)  # low demand
+# buyerdata_large2 = generate_buyerbids(0.7:0.01:0.9, 0:1000:20000, 10, 100)  # high demand
