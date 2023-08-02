@@ -5,15 +5,15 @@
 @cd /d "%~dp0"
 
 : create directory for program files if it doesn't exist yet
-set dir=%HOMEPATH%\AppData\Local\Programs
+set dir=%PROGRAMFILES%\BellusPMA
 if not exist "%dir%\NUL" mkdir "%dir%"
 : copy over files
 XCOPY /e /r /y "%CD%\*.*" "%dir%"
 : create 'executable'
-echo @echo off ^&^& julia --project="%HOMEPATH%\.julia\environments\BellusAuction" --sysimage="%dir%\sys_bellus.so" "%dir%\run.jl" %%^* > "%dir%\bpma.cmd"
+echo @echo off ^&^& julia --project="%HOMEPATH%\.julia\environments\BellusAuction" --sysimage="%dir%\sys_bellus.so" "%dir%\run.jl" %%^* > "%PROGRAMFILES%\bpma.cmd"
 : run Julia install script
 julia --threads auto "%dir%\install.jl"
 : Add program files directory to PATH
-path|find /i "%dir%" > nul || setx path "%PATH%;%dir%"
+: path|find /i "%dir%" > nul || setx path "%PATH%;%dir%"
 echo "Installation completed"
 pause
