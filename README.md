@@ -1,5 +1,7 @@
 # Installation
 
+In case of issues, get in touch with [Edwin](edwinlock@gmail.com).
+
 ## Windows instructions
 
 1. Download and install Julia (version 1.9.2) from https://julialang.org/downloads/. When asked by the installer, select the option "add Julia to PATH".
