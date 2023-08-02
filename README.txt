@@ -3,9 +3,9 @@
 To install the Bellus-PMA software in Windows, follow these steps.
 
 1. Download and install Julia (version 1.9.2) from https://julialang.org/downloads/. When asked by the installer, select the option "add Julia to PATH".
-2. Unpack the provided ZIP file `Bellus-PMA.zip`.
-3. Right-click on the `windows_installer.cmd` file and select 'Run as administrator'. The installer may take a while (approximately 15
+2. Right-click on the `windows_installer.cmd` file and select 'Run as administrator'. The installer may take a while (approximately 10
 minutes on my computer). You can close the window once it says "Installer completed".
+
 
 # Using the software
 

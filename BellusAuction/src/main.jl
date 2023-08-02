@@ -44,7 +44,7 @@ function main(args)
     market = files2auction(buyerfile, supplierfile)
     println("\n-------------------\nBellus-PMA software\n-------------------\n")
     println("Running auction with the following input files:")
-    println("Buyer file: \"$(joinpath(output_dir, buyerfile))\" with $(numbuyers(market)) buyers.")
+    println("Buyer file: \"$(joinpath(output_dir, buyerfile))\" with $(numbuyers(market)) buyers and $(market.numbuyerbids) bids.")
     println("Supplier file: \"$(joinpath(output_dir, supplierfile))\" with $(numsuppliers(market)) sellers.\n")
 
     if method == :exhaustive
