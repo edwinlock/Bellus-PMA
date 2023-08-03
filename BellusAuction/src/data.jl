@@ -13,6 +13,8 @@ Returns:
 """
 function process_buyer_CSV(file)
     df = CSV.read(file, DataFrame)
+    
+    isvalid_buyer_df(df)  # run checks to make sure the input file is valid
 
     # Create list of buyer names and generate dictionary map
     buyernames = unique(df.buyer)
@@ -31,6 +33,14 @@ function process_buyer_CSV(file)
     return (bidvalues=bidvals, bidweights=weights, buyerbids=buyerbids, buyernames=buyernames)
 end
 
+"""Check that the buyer input is valid, and give descriptive error message otherwise."""
+function isvalid_buyer_df(df)
+    @assert hasproperty(df, :buyer) "Buyer CSV file must contain a buyer column"
+    @assert hasproperty(df, :quantity) "Buyer CSV file must contain a quantity column"
+    @assert typeof(df[!,:quantity]) == Vector{Int} "Bid quantities in buyer CSV file must be positive integers."
+    @assert all(df[!, :quantity] .> 0) "Bid quantities in buyer CSV file must be positive integers."
+    @assert all(all.(eachcol(0 .<= df[!,3:end] .<= 1))) "Bid values in buyer CSV file must be decimal numbers in interval [0,1]."
+end
 
 function supplydata2bids(prices, quantities, numsuppliers, good)
     @assert length(prices) == length(quantities) ≥ 0
@@ -50,6 +60,7 @@ Returns: bidlist, supply, reserve quantities, and a mapping from supplier names 
 """
 function process_supplier_CSV(file)
     df = CSV.read(file, DataFrame)
+    isvalid_supplier_df(df)
     n = length(unique(df.supplier))  # count number of suppliers
 
     # Initialise data structures for output
@@ -76,6 +87,21 @@ function process_supplier_CSV(file)
     end
     bidvalues = Origin(0,1)(bidvals)
     return (bidvalues=bidvalues, bidweights=weights, supply=supply, reserves=reserves, suppliernames=suppliernames)
+end
+
+isascending(v) = all(v[2:end] .>= v[1:end-1])
+
+function isvalid_supplier_df(df)
+    @assert hasproperty(df, :supplier) "Supplier CSV must contain a supplier column."
+    @assert hasproperty(df, :price) "Supplier CSV must contain a price column."
+    @assert hasproperty(df, :quantity) "Supplier CSV must contain a quantity column."
+    @assert typeof(df[!,:quantity]) == Vector{Int} "Supply curve quantities in supplier CSV file must be non-negative integers."
+    @assert all(df[!, :quantity] .>= 0) "Supply curve quantities in supplier CSV file must be non-negative integers."
+    @assert all(0 .<= df[!,:price] .<= 1) "Supply curve prices in supplier CSV file must be decimal numbers in interval [0,1]."
+    for sdf in groupby(df, :supplier)
+        @assert isascending(sdf[!, :price]) "Supply curve prices for each supplier must be weakly increasing."
+        @assert isascending(sdf[!, :quantity]) "Supply curve quantities for each supplier must be weakly increasing."
+    end
 end
 
 

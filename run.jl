@@ -7,4 +7,8 @@ print("Loading program...")
 using BellusAuction
 println("done.")
 
-BellusAuction.main(ARGS)
+try
+    BellusAuction.main(ARGS)
+catch e
+    println("Error: $(e.msg)")
+end
