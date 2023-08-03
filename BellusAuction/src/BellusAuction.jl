@@ -53,7 +53,7 @@ include("optimisation.jl")
 include("generate.jl")
 include("main.jl")
 include("optimisation_extras.jl")
-
+include("verification.jl")
 
 export find_prices, find_min_prices, find_allocation, find_balanced_allocation, isfeasible, find_exact_balanced_allocation, faster_find_balanced_allocation
 export price_lp, relaxed_balancing_program, a2matrix, optimal_rounding_lp
@@ -62,6 +62,7 @@ export BellusPMA, AuctionOutcome, numgoods, numsuppliers, numbids, numbuyers, bu
 export generate_buyerbids, generate_suppliers, data2auction, files2auction
 export print_outcomes, allocation_by_buyer, save_outcomes, summaries
 export main
+export is_envyfree, clears_market
 
 using PrecompileTools
 @compile_workload begin

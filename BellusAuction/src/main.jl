@@ -64,6 +64,10 @@ function main(args)
     
     print_outcomes(restricted_market, outcome)
 
-    println("Outputs saved to files in directory \"$(output_dir)\".")
+    println("Outputs saved to files in directory \"$(output_dir)\".\n")
     save_outcomes(restricted_market, outcome, output_dir)
+
+    println("Running verification checks.")
+    is_envyfree(restricted_market, outcome) && println("Outcome is envy-free.")
+    clears_market(restricted_market, outcome) && println("Outcome clears market.")
 end
