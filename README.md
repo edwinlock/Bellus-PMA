@@ -29,3 +29,4 @@ Examples:
 `belluspma -b examples/buyers2.csv -s suppliers2.csv`
 
 `belluspma -b examples/buyers_large1.csv -s suppliers_large.csv -m exhaustivesearch -o numbuyers`
+
