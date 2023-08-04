@@ -83,10 +83,11 @@ end
 
 
 """
-Construct 'feasibility' LP to determine whether the market at given prices
-admits a feasible allocation. This is true iff the LP is feasible.
+Construct 'feasibility' LP to determine whether the market at given prices admits a
+feasible allocation. This is true iff the LP is feasible.
 
-The allocation found prioritises buyer bids by maximising their valuations, but is not 'balanced'.
+The objective is set to maximise buyer utilities, but the resulting allocation may
+not ration fairly.
 
 Optionally, ignore reserve quantity constraints by setting `override_reserves` to true.
 """
@@ -117,8 +118,8 @@ function feasibility_lp(market::BellusPMA, prices::Vector{Float64}; override_res
     @constraint(model, marketclearing[i ∈ 0:n], sum(a[i,:]) == s[i])  #  market-clearing
     !override_reserves && @constraint(model, reserves[i ∈ 0:n], sum(a[i,1:k]) ≥ q[i])  # reserve quantities
 
-    # Force an allocation that priorities buyers
-    @objective(model, Max, sum(bidval[i,b] * a[i,b] for (i,b) ∈ eachindex(a)))
+    # Determine an allocation that maximises aggregate buyer utilities
+    @objective(model, Max, sum( (bidval[i,b] - p[i]) * a[i,b] for (i,b) ∈ eachindex(a) if b ≤ k ))
 
     return model, a
 end
@@ -217,7 +218,7 @@ and a balanced allocation.
 """
 function solve(market; override_reserves=false)
     gains, prices = find_prices(market, objective=:mean)
-    allocation = faster_find_balanced_allocation(market, prices; override_reserves=override_reserves)
+    allocation = find_fair_allocation(market, prices; override_reserves=override_reserves)
     isnothing(allocation) && return nothing
     return (gains=gains, prices=prices, allocation=allocation)
 end

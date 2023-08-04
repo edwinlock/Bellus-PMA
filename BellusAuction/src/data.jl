@@ -189,8 +189,13 @@ function summaries(market, outcome)
         namecol[market.buyerbids[name]] .= name
         # numcol[market.buyerbids[name]] .= 1:length(market.buyerbids[name])
     end
-    insertcols!(allocation_df, 1, "Buyer" => namecol)
-
+    insertcols!(
+        allocation_df,
+        1,
+        "Buyer" => namecol,
+        "Quantity" => market.bidweights[1:market.numbuyerbids],
+        "Allocated" => vec(sum(a, dims=2))    
+        )
     return prices_summary, buyer_summary, supplier_summary, allocation_df
 end
 

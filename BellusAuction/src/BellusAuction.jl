@@ -55,7 +55,7 @@ include("main.jl")
 include("optimisation_extras.jl")
 include("verification.jl")
 
-export find_prices, find_min_prices, find_allocation, find_balanced_allocation, isfeasible, find_exact_balanced_allocation, faster_find_balanced_allocation
+export find_prices, find_min_prices, find_allocation, find_balanced_allocation, isfeasible, find_exact_balanced_allocation, find_fair_allocation
 export price_lp, relaxed_balancing_program, a2matrix, optimal_rounding_lp
 export solve, exhaustivesearch, heuristic
 export BellusPMA, AuctionOutcome, numgoods, numsuppliers, numbids, numbuyers, buyerids, supplierids

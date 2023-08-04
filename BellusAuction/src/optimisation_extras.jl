@@ -73,28 +73,38 @@ end
 
 
 """
-Formulate problem for finding relaxed balanced allocation that clears supply & reserve quantities.
+Formulate problem for finding a fractional allocation with fair rationing that clears supply & reserve quantities.
 This modifies the feasibility LP by replacing the objective function.
 """
-function relaxed_balancing_program(market::BellusPMA, prices::Vector{Float64}; override_reserves=false)
+function fractional_fair_program(market::BellusPMA, prices::Vector{Float64}, buyergains; override_reserves=false)
     k = market.numbuyerbids
     w = market.bidweights
+    bidval = market.bidvalues
+    p = Origin(0)([0.0; prices])
+
+    # Set up model
     model, a = feasibility_lp(market, prices; override_reserves=override_reserves)
     set_optimizer(model, COSMO.Optimizer)  # change solver to COSMO
-    set_attribute(model, "eps_abs", 1e-10)
-    # Set objective to maximise the square roots of allocations to buyer bids
-    @objective(model, Min, sum( a[i,b]^2 / w[b] for (i,b) in eachindex(a) if i ≠ 0 && b ∈ 1:k ))
+    # set_attribute(model, "eps_abs", 1e-10)
+
+    # Set constraint to ensure that buyer gains are maximised
+    @constraint(model, sum( (bidval[i,b] - p[i]) * a[i,b] for (i,b) ∈ eachindex(a) if b ≤ k ) ≥ buyergains)
+
+    # Set objective to minimise the squares of allocations to buyer bids
+    @objective(model, Min, sum( a[i,b]^2 / w[b] for (i,b) in eachindex(a) if i ≠ 0 && b ≤ k ))
+
     return model, a
 end
 
 
 """
-Given a relaxed balanced allocation (as a matrix) and the number of buyer bids, return an
+Given a fractional fair allocation (as a matrix), the bid weights and the number of buyer bids, return an
 integral equilibrium allocation delta obtained by rounding each entry up or down. Rounding
-in this way is performed to maximise the original sum-of-squares objective that the
-fractional allocation maximises.
+in this way is performed to minimise the original sum-of-squares objective that the
+fractional allocation minimises.
 """
-function optimal_rounding_lp(allocation, numbuyerbids, reserves)
+function optimal_rounding_lp(allocation, bidweights, numbuyerbids, reserves)
+    w = bidweights
     k = numbuyerbids
     n, m = size(allocation); n -= 1
     a = allocation
@@ -118,30 +128,90 @@ function optimal_rounding_lp(allocation, numbuyerbids, reserves)
     @constraint(model, reserves[i ∈ 1:n], sum(x[i,1:k]) ≥ Δreserve[i])  # uphold reserve quantity constraints
     @constraint(model, bounds[i ∈ 0:n, b ∈ 1:m], 0 ≤ x[i,b] ≤ ub[i,b])  # upper and lower bounds on variables
 
-    @objective(model, Min, sum( (ca[i,b]^2 - fa[i,b]^2) * x[i,b] for i ∈ 0:n, b ∈ 1:m ))
+    @objective(model, Min, sum( (ca[i,b]^2 - fa[i,b]^2)/w[b] * x[i,b] for i ∈ 1:n, b ∈ 1:k ))
 
     return model, x
 end
 
 
 """
-A fast method for computing a balanced equilibrium allocation at given `prices`. If `overrides_reserves`
+A fast method for computing a fair equilibrium allocation at given `prices`. If `overrides_reserves`
 is not set to `false` (default), the allocation will clear reserve quantities, or the function returns
 `nothing` if no such allocation exists. If `overrides_reserves` is set to `true`, an allocation that may
 not clear reserve quantities is returned.
 """
-function faster_find_balanced_allocation(market::BellusPMA, prices; override_reserves=false)
-    relaxed_model, a = relaxed_balancing_program(market, prices; override_reserves=override_reserves)
-    optimize!(relaxed_model)
-
+function find_fair_allocation(market::BellusPMA, prices; override_reserves=false)
+    # Solve basic feasibility model to get maximal buyer gains, or return nothing if market not feasible
+    feasibility_model, _ = feasibility_lp(market, prices)
+    optimize!(feasibility_model)
     # If feasible allocation not found, return nothing
-    termination_status(relaxed_model) != OPTIMAL && return nothing
+    termination_status(feasibility_model) != OPTIMAL && return nothing
+    buyergains = objective_value(feasibility_model)
 
-    # Create allocation matrix
+    # Compute fractional allocation with fair rationing
+    relaxed_model, a = fractional_fair_program(
+        market,
+        prices,
+        buyergains;
+        override_reserves=override_reserves
+    );
+    optimize!(relaxed_model)
     fractional_allocation = a2matrix(a, axes(market.bidvalues))
     
     # Optimally round each entry in fractional allocation up or down
-    rounding_model, x = optimal_rounding_lp(fractional_allocation, market.numbuyerbids, market.reservequantities)
+    rounding_model, x = optimal_rounding_lp(
+        fractional_allocation,
+        market.bidweights,
+        market.numbuyerbids,
+        market.reservequantities
+    )
+    optimize!(rounding_model)
+    delta = a2matrix(Int, x, axes(market.bidvalues))
+
+    return floor.(Int, fractional_allocation) .+ delta
+end
+
+
+function find_fairest_allocation(market::BellusPMA, prices; override_reserves=false)
+    # Prep
+    n,  = numgoods(market), numbids(market)
+    k = market.numbuyerbids
+    w = market.bidweights
+    bidval = market.bidvalues
+    p = Origin(0)([0.0; prices])
+
+    # Step 1: determine maximal buyer gains
+    model, a = feasibility_lp(market, prices)
+    set_optimizer(model, COSMO.Optimizer)  # change solver to COSMO
+    optimize!(model)
+    termination_status(model) != OPTIMAL && return nothing
+    buyergains = objective_value(model)
+
+    # Step 2: Fix buyer gains and minimise Σ(total demand of non-reject goods of bid)^2 over all buyer bids
+    # Add variables to capture total quantities of non-reject goods received by each buyer bid
+    @variable(model, x[b ∈ 1:k])
+    @constraint(model, [b ∈ 1:k], x[b] ==sum(a[i,j] for (i,j) in eachindex(a) if i > 0 && j == b))
+    # Add constraint to fix buyer gains
+    @constraint(model, sum( (bidval[i,b] - p[i]) * a[i,b] for (i,b) ∈ eachindex(a) if b ≤ k ) ≥ buyergains)
+    # Add objective
+    @objective(model, Min, sum(x[b]^2 for b in 1:k))  # sum of squares of demand expressions
+    optimize!(model)
+    # Extract values of demand variables x
+    demand = round.(value.(x))
+
+    # Step 3: Fix total demand of non-reject goods for each buyer bid and maximise sum of squares of allocation matrix entries
+    @constraint(model, [b ∈ 1:k], x[b] == demand[b])
+    @objective(model, Max, sum( a[i,b]^2 for (i,b) in eachindex(a) if i > 0 && b ≤ k))
+    optimize!(model)
+    fractional_allocation = a2matrix(a, axes(market.bidvalues))
+
+    # Step 4: Round consistently to get integer allocation
+    rounding_model, x = optimal_rounding_lp(
+        fractional_allocation,
+        market.bidweights,
+        market.numbuyerbids,
+        market.reservequantities
+    )
     optimize!(rounding_model)
     delta = a2matrix(Int, x, axes(market.bidvalues))
 
