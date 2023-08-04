@@ -5,7 +5,7 @@ Generate `m` bids. Bid value entries are drawn from `bidvals[i]` distribution
 for each good i in eachindex(bidvals). Bid weights/quantities are drawn from
 distribution `weights`.
 """
-function generate_buyerbids(vals, weights, m)
+function generate_buyerdata(vals, weights, m)
     n = length(vals)
     bidvalues = Origin(0,1)(zeros(n+1, m))
     for b in 1:m
@@ -19,14 +19,14 @@ end
 
 
 """Generate `m` bids with values drawn from `bidvals` for `n` goods."""
-generate_buyerbids(values, weights, n, m) = generate_buyerbids(ntuple(x->values, n), weights, m)
+generate_buyerdata(values, weights, n, m) = generate_buyerdata(ntuple(x->values, n), weights, m)
 
 
 """
 Generate `n` suppliers with supply quantities drawn from `supplyvals', and reserve quantities
 computed as a percentage of supply drawn from reserve_pcts.
 """
-function generate_suppliers(supplyvals, reserve_prices, reserve_pcts, n)
+function generate_supplierdata(supplyvals, reserve_prices, reserve_pcts, n)
     supply = rand(supplyvals, n)
     bidvalues = Origin(0,1)(zeros(n+1,n))
     for i ∈ 1:n; bidvalues[i,i] = rand(reserve_prices); end
@@ -38,7 +38,7 @@ end
 
 
 """Generate `n` suppliers with supply quantities drawn from `supplyvals'."""
-generate_suppliers(supplyvals, n) = generate_suppliers(supplyvals, 0:0, 0:0, n)
+generate_supplierdata(supplyvals, n) = generate_supplierdata(supplyvals, 0:0, 0:0, n)
 
 
 function buyerdata2file(buyerdata, output)
@@ -72,5 +72,6 @@ end
 
 
 # Command used to generate 'large' examples
-# buyerdata_large1 = generate_buyerbids(0.7:0.01:0.9, 1000:500:7000, 10, 100)  # low demand
-# buyerdata_large2 = generate_buyerbids(0.7:0.01:0.9, 0:1000:20000, 10, 100)  # high demand
+# buyerdata_large1 = generate_buyerdata(0.7:0.01:0.9, 1000:500:7000, 10, 100)  # low demand
+# buyerdata_large2 = generate_buyerdata(0.7:0.01:0.9, 0:1000:20000, 10, 100)  # high demand
+

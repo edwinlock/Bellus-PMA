@@ -171,43 +171,43 @@ function find_allocation(market::BellusPMA, prices; override_reserves=false)
 end
 
 
-"""
-Construct integer program for finding a balanced allocation that clears supply & reserve quantities.
-This modifies the feasibility LP by forcing the variables to be integral and replacing the objective function.
-"""
-function balanced_allocation_program(market::BellusPMA, prices::Vector{Float64}; override_reserves=false)
-    k = market.numbuyerbids
-    w = market.bidweights
-    model, a = feasibility_lp(market, prices; override_reserves=override_reserves)
-    # Start modifying the model
-    set_optimizer(model, SCIP.Optimizer)  # change solver to SCIP
-    set_integer.(a)  # force all variables to be integral
-    # Set objective to maximise the square roots of allocations to buyer bids, weighted by bid weights
-    @variable(model, x)  # introduce variable for new objective
-    @constraint(model, x == sum( (a[i,b])^2 / w[b] for (i,b) in eachindex(a) if i ≠ 0 && b ∈ 1:k) )
-    @objective(model, Min, x)
-    return model, a
-end
+# """
+# Construct integer program for finding a balanced allocation that clears supply & reserve quantities.
+# This modifies the feasibility LP by forcing the variables to be integral and replacing the objective function.
+# """
+# function balanced_allocation_program(market::BellusPMA, prices::Vector{Float64}; override_reserves=false)
+#     k = market.numbuyerbids
+#     w = market.bidweights
+#     model, a = feasibility_lp(market, prices; override_reserves=override_reserves)
+#     # Start modifying the model
+#     set_optimizer(model, SCIP.Optimizer)  # change solver to SCIP
+#     set_integer.(a)  # force all variables to be integral
+#     # Set objective to maximise the square roots of allocations to buyer bids, weighted by bid weights
+#     @variable(model, x)  # introduce variable for new objective
+#     @constraint(model, x == sum( (a[i,b])^2 / w[b] for (i,b) in eachindex(a) if i ≠ 0 && b ∈ 1:k) )
+#     @objective(model, Min, x)
+#     return model, a
+# end
 
 
-"""
-Compute a balanced equilibrium allocation at given `prices`. If `overrides_reserves` is not set to `false`
-(default), the allocation will clear reserve quantities, or the function returns `nothing` if no such
-allocation exists. If `overrides_reserves` is set to `true`, an allocation that may not clear reserve
-quantities is returned.
-"""
-function find_balanced_allocation(market::BellusPMA, prices; override_reserves=false)
-    model, a = balanced_allocation_program(market, prices; override_reserves=override_reserves)
-    optimize!(model)
+# """
+# Compute a balanced equilibrium allocation at given `prices`. If `overrides_reserves` is not set to `false`
+# (default), the allocation will clear reserve quantities, or the function returns `nothing` if no such
+# allocation exists. If `overrides_reserves` is set to `true`, an allocation that may not clear reserve
+# quantities is returned.
+# """
+# function find_balanced_allocation(market::BellusPMA, prices; override_reserves=false)
+#     model, a = balanced_allocation_program(market, prices; override_reserves=override_reserves)
+#     optimize!(model)
 
-    # If feasible allocation not found, return nothing
-    termination_status(model) != OPTIMAL && return nothing
+#     # If feasible allocation not found, return nothing
+#     termination_status(model) != OPTIMAL && return nothing
 
-    # Create allocation matrix
-    allocation = a2matrix(Int, a, axes(market.bidvalues))
+#     # Create allocation matrix
+#     allocation = a2matrix(Int, a, axes(market.bidvalues))
     
-    return allocation
-end
+#     return allocation
+# end
 
 
 """

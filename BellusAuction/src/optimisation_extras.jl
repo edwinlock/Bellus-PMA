@@ -1,4 +1,5 @@
-using JuMP, HiGHS, Combinatorics, COSMO
+using JuMP, HiGHS, Combinatorics
+# using COSMO
 using ProgressBars
 
 """
@@ -84,14 +85,17 @@ function fractional_fair_program(market::BellusPMA, prices::Vector{Float64}, buy
 
     # Set up model
     model, a = feasibility_lp(market, prices; override_reserves=override_reserves)
-    set_optimizer(model, COSMO.Optimizer)  # change solver to COSMO
+    set_optimizer(model, HiGHS.Optimizer)  # ensure that solver is set to HiGHS
+    # set_optimizer(model, COSMO.Optimizer)  # change solver to COSMO
+    # set_attribute(model, "max_iter", 10^5)
     # set_attribute(model, "eps_abs", 1e-10)
 
     # Set constraint to ensure that buyer gains are maximised
-    @constraint(model, sum( (bidval[i,b] - p[i]) * a[i,b] for (i,b) ∈ eachindex(a) if b ≤ k ) ≥ buyergains)
+    @constraint(model, sum( (bidval[i,b] - p[i]) * a[i,b] for (i,b) ∈ eachindex(a) if b ≤ k ) ≥ buyergains-EPS_TOL)
 
     # Set objective to minimise the squares of allocations to buyer bids
-    @objective(model, Min, sum( a[i,b]^2 / w[b] for (i,b) in eachindex(a) if i ≠ 0 && b ≤ k ))
+    nw = market.bidweights ./ gcd(market.bidweights)  # normalise the bid weights
+    @objective(model, Min, sum( a[i,b]^2 / nw[b] for (i,b) in eachindex(a) if i ≠ 0 && b ≤ k ))
 
     return model, a
 end
@@ -149,13 +153,13 @@ function find_fair_allocation(market::BellusPMA, prices; override_reserves=false
     buyergains = objective_value(feasibility_model)
 
     # Compute fractional allocation with fair rationing
-    relaxed_model, a = fractional_fair_program(
+    fractional_model, a = fractional_fair_program(
         market,
         prices,
         buyergains;
         override_reserves=override_reserves
     );
-    optimize!(relaxed_model)
+    optimize!(fractional_model)
     fractional_allocation = a2matrix(a, axes(market.bidvalues))
     
     # Optimally round each entry in fractional allocation up or down
@@ -172,48 +176,48 @@ function find_fair_allocation(market::BellusPMA, prices; override_reserves=false
 end
 
 
-function find_fairest_allocation(market::BellusPMA, prices; override_reserves=false)
-    # Prep
-    n,  = numgoods(market), numbids(market)
-    k = market.numbuyerbids
-    w = market.bidweights
-    bidval = market.bidvalues
-    p = Origin(0)([0.0; prices])
+# function find_fairest_allocation(market::BellusPMA, prices; override_reserves=false)
+#     # Prep
+#     n,  = numgoods(market), numbids(market)
+#     k = market.numbuyerbids
+#     w = market.bidweights
+#     bidval = market.bidvalues
+#     p = Origin(0)([0.0; prices])
 
-    # Step 1: determine maximal buyer gains
-    model, a = feasibility_lp(market, prices)
-    set_optimizer(model, COSMO.Optimizer)  # change solver to COSMO
-    optimize!(model)
-    termination_status(model) != OPTIMAL && return nothing
-    buyergains = objective_value(model)
+#     # Step 1: determine maximal buyer gains
+#     model, a = feasibility_lp(market, prices)
+#     set_optimizer(model, COSMO.Optimizer)  # change solver to COSMO
+#     optimize!(model)
+#     termination_status(model) != OPTIMAL && return nothing
+#     buyergains = objective_value(model)
 
-    # Step 2: Fix buyer gains and minimise Σ(total demand of non-reject goods of bid)^2 over all buyer bids
-    # Add variables to capture total quantities of non-reject goods received by each buyer bid
-    @variable(model, x[b ∈ 1:k])
-    @constraint(model, [b ∈ 1:k], x[b] ==sum(a[i,j] for (i,j) in eachindex(a) if i > 0 && j == b))
-    # Add constraint to fix buyer gains
-    @constraint(model, sum( (bidval[i,b] - p[i]) * a[i,b] for (i,b) ∈ eachindex(a) if b ≤ k ) ≥ buyergains)
-    # Add objective
-    @objective(model, Min, sum(x[b]^2 for b in 1:k))  # sum of squares of demand expressions
-    optimize!(model)
-    # Extract values of demand variables x
-    demand = round.(value.(x))
+#     # Step 2: Fix buyer gains and minimise Σ(total demand of non-reject goods of bid)^2 over all buyer bids
+#     # Add variables to capture total quantities of non-reject goods received by each buyer bid
+#     @variable(model, x[b ∈ 1:k])
+#     @constraint(model, [b ∈ 1:k], x[b] ==sum(a[i,j] for (i,j) in eachindex(a) if i > 0 && j == b))
+#     # Add constraint to fix buyer gains
+#     @constraint(model, sum( (bidval[i,b] - p[i]) * a[i,b] for (i,b) ∈ eachindex(a) if b ≤ k ) ≥ buyergains)
+#     # Add objective
+#     @objective(model, Min, sum(x[b]^2 for b in 1:k))  # sum of squares of demand expressions
+#     optimize!(model)
+#     # Extract values of demand variables x
+#     demand = round.(value.(x))
 
-    # Step 3: Fix total demand of non-reject goods for each buyer bid and maximise sum of squares of allocation matrix entries
-    @constraint(model, [b ∈ 1:k], x[b] == demand[b])
-    @objective(model, Max, sum( a[i,b]^2 for (i,b) in eachindex(a) if i > 0 && b ≤ k))
-    optimize!(model)
-    fractional_allocation = a2matrix(a, axes(market.bidvalues))
+#     # Step 3: Fix total demand of non-reject goods for each buyer bid and maximise sum of squares of allocation matrix entries
+#     @constraint(model, [b ∈ 1:k], x[b] == demand[b])
+#     @objective(model, Max, sum( a[i,b]^2 for (i,b) in eachindex(a) if i > 0 && b ≤ k))
+#     optimize!(model)
+#     fractional_allocation = a2matrix(a, axes(market.bidvalues))
 
-    # Step 4: Round consistently to get integer allocation
-    rounding_model, x = optimal_rounding_lp(
-        fractional_allocation,
-        market.bidweights,
-        market.numbuyerbids,
-        market.reservequantities
-    )
-    optimize!(rounding_model)
-    delta = a2matrix(Int, x, axes(market.bidvalues))
+#     # Step 4: Round consistently to get integer allocation
+#     rounding_model, x = optimal_rounding_lp(
+#         fractional_allocation,
+#         market.bidweights,
+#         market.numbuyerbids,
+#         market.reservequantities
+#     )
+#     optimize!(rounding_model)
+#     delta = a2matrix(Int, x, axes(market.bidvalues))
 
-    return floor.(Int, fractional_allocation) .+ delta
-end
+#     return floor.(Int, fractional_allocation) .+ delta
+# end
