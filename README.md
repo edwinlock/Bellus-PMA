@@ -24,8 +24,8 @@ add this alias permanently to your shell configuration.
 The software can be run in a terminal or the command prompt (in Windows). (To open the command prompt in Windows, press the Windows key + R, then type `cmd.exe` and press
 return.)
 
-Run the software by typing `belluspma` and pressing return. To see all options for the software, use the option `belluspma --help`. Example buyer and supplier
-CSV files are provided in the `examples` folder.
+Run the software by typing `belluspma` and pressing return. The buyer and supplier CSV files are provided using the `-b` and `-s` options, as shown in the examples below.
+To see all options for the software, use the option `belluspma --help`. Example buyer and supplier CSV files are provided in the `examples` folder.
 
 Examples:
 
