@@ -23,6 +23,7 @@ docs/site/
 # environment.
 Manifest.toml
 
+precompile.jl
 sys_bellus.so
 outcomes/
 distributed_zips/
