@@ -62,7 +62,7 @@ export BellusPMA, AuctionOutcome, numgoods, numsuppliers, numbids, numbuyers, bu
 export generate_buyerbids, generate_suppliers, data2auction, files2auction
 export print_outcomes, allocation_by_buyer, save_outcomes, summaries
 export main
-export is_envyfree, clears_market
+export isequilibrium
 
 using PrecompileTools
 @compile_workload begin

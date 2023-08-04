@@ -1,6 +1,6 @@
 using OffsetArrays: Origin
 
-function is_envyfree(market, outcome)
+function isenvyfree(market, outcome)
     a = outcome.allocation
     w = market.bidweights
     # Check that allocations to each bid (incl. reject good) sum up to its bid weight
@@ -15,7 +15,7 @@ end
 Check that quantities allocated sum up to supply, and (optionally) are weakly greater
 than reserve quantities.
 """
-function clears_market(market, outcome; override_reserves=false)
+function clearsmarket(market, outcome; override_reserves=false)
     a = sum(outcome.allocation[1:end,:], dims=2)  # aggregate allocation per good
     any(a .> market.supply) && return false
     if !override_reserves
@@ -23,3 +23,6 @@ function clears_market(market, outcome; override_reserves=false)
     end
     return true
 end
+
+
+isequilibrium(market, outcome; override_reserves=false) = isenvyfree(market, outcome) && clearsmarket(market, outcome; override_reserves=override_reserves)
