@@ -70,14 +70,18 @@ using PrecompileTools
         dir = joinpath(@__DIR__, "")
         buyers = joinpath(dir, "buyers.csv")
         suppliers = joinpath(dir, "suppliers.csv")
-        args1 = ["-b", buyers, "-s", suppliers, "-m", "exhaustive", "-o", "gains"]
-        args2 = ["-b", buyers, "-s", suppliers, "-m", "exhaustive", "-o", "numsuppliers"]
+        market = files2auction(buyers, suppliers)
+    
+        exhaustivesearch(market, :gains)
+        exhaustivesearch(market, :numsuppliers)
+        # args1 = ["-b", buyers, "-s", suppliers, "-m", "exhaustive", "-o", "gains"]
+        # args2 = ["-b", buyers, "-s", suppliers, "-m", "exhaustive", "-o", "numsuppliers"]
+        # BellusAuction.main(args1)
+        # BellusAuction.main(args2)
         args3 = ["-b", buyers, "-s", suppliers, "-m", "heuristic"]
         args4 = ["-b", buyers, "-s", suppliers, "-m", "override-reserves"]
-        BellusAuction.main(args1)
-        BellusAuction.main(args2)
-        BellusAuction.main(args3)
-        BellusAuction.main(args4)
+        BellusAuction.main(args3)  # run heuristic and precompile ArgParse etc. 
+        BellusAuction.main(args4)  # run solve with override_reserves
     end
 end
 

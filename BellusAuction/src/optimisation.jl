@@ -233,12 +233,16 @@ The fn `lt` (short for 'less than') must be a bivariate function lt(x,y) that re
 
 Returns the best market instance and (gains, prices, allocation).
 """
-function exhaustivesearch(market, lt)
+function exhaustivesearch(market, lt; display_progress=false)
     n = numsuppliers(market)
     # First we search for the optimal supplier subset leading to an equilibrium, according to total order `lt`.
     best = (gains=-1, suppliers=Int[])
-    possibilities = collect(powerset(1:n))  # all possible subsets of suppliers
-    for suppliers ∈ ProgressBar(possibilities)
+    if display_progress
+        possibilities = ProgressBar(collect(powerset(1:n)))  # all possible subsets of suppliers
+    else
+        possibilities = powerset(1:n)
+    end
+    for suppliers ∈ possibilities
         restricted_market = market[suppliers]
         gains, prices = find_prices(restricted_market, objective= :min)
         if isfeasible(restricted_market, prices)
@@ -271,8 +275,8 @@ Implement exhaustive search with two objectives: `gains`, and `numsuppliers`.
 
 Returns the 'best' market as well as (gains, prices, allocation)
 """
-function exhaustivesearch(market, objective::Symbol)
-    objective == :gains && return exhaustivesearch(market, lt_gains)
+function exhaustivesearch(market, objective::Symbol; display_progress=false)
+    objective == :gains && return exhaustivesearch(market, lt_gains; display_progress=display_progress)
     objective == :numsuppliers && return exhaustivesearch(market, lt_numsuppliers)
     error("Objective $(objective) not yet implemented.")
 end

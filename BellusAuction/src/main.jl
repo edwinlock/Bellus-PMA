@@ -49,7 +49,7 @@ function main(args)
 
     if method == :exhaustive
         println("Solving auction using \"exhaustive search\" method with \"$(objective)\" objective.\n")
-        restricted_market, outcome = exhaustivesearch(market, objective)
+        restricted_market, outcome = exhaustivesearch(market, objective; display_progress=true)
     elseif method == :heuristic
         println("Using the \"heuristic\" method for finding prices and allocations of supply to buyers.\n")
         restricted_market, outcome = heuristic(market)
@@ -61,7 +61,7 @@ function main(args)
     else
         error("Method is not implemented.")
     end
-    
+
     print_outcomes(restricted_market, outcome)
 
     println("Outputs saved to files in directory \"$(output_dir)\".\n")
