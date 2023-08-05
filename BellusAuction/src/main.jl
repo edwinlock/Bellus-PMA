@@ -67,6 +67,6 @@ function main(args)
     println("Outputs saved to files in directory \"$(output_dir)\".\n")
     save_outcomes(restricted_market, outcome, output_dir)
 
-    print("Running verification checks...")
+    print("Verifying solution...")
     isequilibrium(restricted_market, outcome) && println("outcome is an equilibrium.")
 end
