@@ -8,7 +8,7 @@ In case of issues, get in touch with [Edwin](edwinlock@gmail.com).
 1. Download and install Julia (version 1.9.2) from https://julialang.org/downloads/. When asked by the installer, select the option "add Julia to PATH".
 2. Right-click on the `windows_installer.cmd` file and select 'Run as administrator'. The installer may take a while (approximately 10 minutes on my computer).
 You can close the window once it says "Installer completed".
-3. (Optional.) I recommend installing a modern terminal such as the (free) Microsoft Windows Terminal available at https://www.microsoft.com/store/productid/9N0DX20HK701.
+3. (Recommended.) Install the (free) Microsoft Windows Terminal available at https://www.microsoft.com/store/productid/9N0DX20HK701.
 
 ### Linux / macOS instructions
 
@@ -24,12 +24,18 @@ add this alias permanently to your shell configuration.
 The software can be run in a terminal or the command prompt (in Windows). (To open the command prompt in Windows, press the Windows key + R, then type `cmd.exe` and press
 return.)
 
-Run the software by typing `belluspma` and pressing return. The buyer and supplier CSV files are provided using the `-b` and `-s` options, as shown in the examples below.
-To see all options for the software, use the option `belluspma --help`. Example buyer and supplier CSV files are provided in the `examples` folder.
+To use the software, open the command prompt or terminal, and ensure you are in the folder containing your buyer and supplier CSV files. In Windows with the Terminal installed,
+one way of doing this is to right-click on the folder in question in File Explorer and select "Open in Terminal".
+Then run the software by typing `belluspma` together with the appropriate options, and pressing return. The buyer and supplier CSV files are provided using the `-b` and `-s` options,
+as shown in the examples below. To see all options for the software, use the option `belluspma --help`. Example buyer and supplier CSV files are provided in the `examples` folder.
 
-Examples:
+### Examples
 
-`belluspma -b examples/buyers2.csv -s suppliers2.csv`
+Right-click on the `examples/` folder and select "Open in Terminal". Then run
+
+`belluspma -b buyers_medium2.csv -s suppliers_medium.csv`
+
+or 
 
 `belluspma -b examples/buyers_large1.csv -s suppliers_large.csv -m exhaustivesearch -o numbuyers`
 
