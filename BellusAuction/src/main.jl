@@ -44,8 +44,8 @@ function main(args)
     market = files2auction(buyerfile, supplierfile)
     println("\n-------------------\nBellus-PMA software\n-------------------\n")
     println("Running auction with the following input files:")
-    println("Buyer file: \"$(joinpath(output_dir, buyerfile))\" with $(numbuyers(market)) buyers and $(market.numbuyerbids) bids.")
-    println("Supplier file: \"$(joinpath(output_dir, supplierfile))\" with $(numsuppliers(market)) sellers.\n")
+    println("Buyer file: \"$(abspath(buyerfile))\" with $(numbuyers(market)) buyers and $(market.numbuyerbids) bids.")
+    println("Supplier file: \"$(abspath(supplierfile))\" with $(numsuppliers(market)) sellers.\n")
 
     if method == :exhaustive
         println("Solving auction using \"exhaustive search\" method with \"$(objective)\" objective.\n")
@@ -69,6 +69,4 @@ function main(args)
 
     print("Running verification checks...")
     isequilibrium(restricted_market, outcome) && println("outcome is an equilibrium.")
-    # is_envyfree(restricted_market, outcome) && println("Outcome is envy-free.")
-    # clears_market(restricted_market, outcome) && println("Outcome clears market.")
 end
