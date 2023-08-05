@@ -48,8 +48,8 @@ function buyerdata2file(buyerdata, output)
     n = size(bidvals)[1]
     matrix = [weights'; bidvals]'
     df = DataFrame([names matrix], [:buyer, :quantity] ∪ Symbol.(1:n))
-    # CSV.write(output, df)
-    return df
+    CSV.write(output, df)
+    # return df
 end
 
 """Currently only supports one-step supply curves."""
@@ -66,8 +66,8 @@ function supplierdata2file(supplierdata, output)
         :price => price_col,
         :quantity => quantity_col
     )
-    return df
-    # CSV.write(output, df)
+    # return df
+    CSV.write(output, df)
 end
 
 
@@ -75,3 +75,8 @@ end
 # buyerdata_large1 = generate_buyerdata(0.7:0.01:0.9, 1000:500:7000, 10, 100)  # low demand
 # buyerdata_large2 = generate_buyerdata(0.7:0.01:0.9, 0:1000:20000, 10, 100)  # high demand
 
+## GENERATE GIANT FILES
+# buyerdata_giant = BellusAuction.generate_buyerdata(0.7:0.01:0.9, 1000:500:7000, 15, 100)
+# supplierdata_giant = BellusAuction.generate_supplierdata(1000:1000:10000, 0.0:0.01:1.0, 0.:0.1:1.0, 15)
+# BellusAuction.buyerdata2file(buyerdata_giant, "buyers_giant.csv")
+# BellusAuction.supplierdata2file(supplierdata_giant, "suppliers_giant.csv")
