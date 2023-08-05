@@ -277,7 +277,7 @@ Returns the 'best' market as well as (gains, prices, allocation)
 """
 function exhaustivesearch(market, objective::Symbol; display_progress=false)
     objective == :gains && return exhaustivesearch(market, lt_gains; display_progress=display_progress)
-    objective == :numsuppliers && return exhaustivesearch(market, lt_numsuppliers)
+    objective == :numsuppliers && return exhaustivesearch(market, lt_numsuppliers; display_progress=display_progress)
     error("Objective $(objective) not yet implemented.")
 end
 

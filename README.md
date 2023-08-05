@@ -37,5 +37,5 @@ Right-click on the `examples/` folder and select "Open in Terminal". Then run
 
 or 
 
-`belluspma -b examples/buyers_large1.csv -s suppliers_large.csv -m exhaustivesearch -o numbuyers`
+`belluspma -b buyers_large1.csv -s suppliers_large.csv -m exhaustive -o numsuppliers`
 

@@ -11,13 +11,13 @@ function random_market(n)
 end
 
 @testset "Randomly generated markets with 2 suppliers" begin
-    for _ in 1:100
+    for _ in 1:1000
         @test isequilibrium(exhaustivesearch(random_market(2), :gains)...)
     end
 end
 
 @testset "Randomly generated markets with 5 suppliers" begin
-    for _ in 1:100
+    for _ in 1:1000
         @test isequilibrium(exhaustivesearch(random_market(5), :gains)...)
     end
 end
