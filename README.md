@@ -29,7 +29,7 @@ one way of doing this is to right-click on the folder in question in File Explor
 Then run the software by typing `belluspma` together with the appropriate options, and pressing return. The buyer and supplier CSV files are provided using the `-b` and `-s` options,
 as shown in the examples below. To see all options for the software, use the option `belluspma --help`. Example buyer and supplier CSV files are provided in the `examples` folder.
 
-### Examples
+### Examples
 
 Right-click on the `examples/` folder and select "Open in Terminal". Then run
 
