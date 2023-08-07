@@ -38,4 +38,3 @@ Right-click on the `examples/` folder and select "Open in Terminal". Then run
 or 
 
 `belluspma -b buyers_large1.csv -s suppliers_large.csv -m exhaustive -o numsuppliers`
-
