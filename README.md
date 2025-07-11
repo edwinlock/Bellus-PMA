@@ -1,6 +1,6 @@
 # The Bellus-PMA: a Product-Mix Auction variant designed for Bellus Ventures.
 
-In case of issues, get in touch with [Edwin](edwinlock@gmail.com).
+In case of issues, get in touch with [Edwin](mailto:edwinlock@gmail.com).
 
 ## Installation
 ### Windows instructions
